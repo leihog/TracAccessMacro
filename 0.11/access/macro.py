@@ -11,7 +11,7 @@ import re
 from trac.core import *
 from trac.wiki.api import IWikiMacroProvider
 from trac.wiki.formatter import format_to_html
-from trac.perm import PermissionSystem, IPermissionStore, IPermissionPolicy, IPermissionGroupProvider
+from trac.perm import PermissionSystem, IPermissionStore
 
 class AccessMacro(Component):
     """
@@ -45,7 +45,6 @@ class AccessMacro(Component):
     PARSE_RULE = re.compile(r'^\s*(allow|deny)\s*\(\s*([^,)]+\s*(?:,\s*[^,\)]+)*)\)(.*)', re.I)
     SPLIT_LIST = re.compile(r'\s*,\s*')
 	
-    #group_providers = ExtensionPoint(IPermissionGroupProvider)
     perm_store = ExtensionPoint(IPermissionStore)
 
     # IWikiMacroProvider
