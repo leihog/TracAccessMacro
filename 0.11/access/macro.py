@@ -11,6 +11,7 @@ import re
 from trac.core import *
 from trac.wiki.api import IWikiMacroProvider
 from trac.wiki.formatter import format_to_html
+from trac.perm import PermissionSystem, IPermissionStore, IPermissionPolicy, IPermissionGroupProvider
 
 class AccessMacro(Component):
     """
@@ -43,6 +44,9 @@ class AccessMacro(Component):
 
     PARSE_RULE = re.compile(r'^\s*(allow|deny)\s*\(\s*([^,)]+\s*(?:,\s*[^,\)]+)*)\)(.*)', re.I)
     SPLIT_LIST = re.compile(r'\s*,\s*')
+	
+    #group_providers = ExtensionPoint(IPermissionGroupProvider)
+    perm_store = ExtensionPoint(IPermissionStore)
 
     # IWikiMacroProvider
     def get_macros(self):
@@ -82,18 +86,27 @@ class AccessMacro(Component):
             else:
                 raise TracError("Invalid permission specification: %s" % content)
 
+        # get user permissions and groups
+        user_perms = []
+        for provider in self.perm_store:
+            foobar = provider.get_all_permissions();
+            for uu in foobar:
+                if uu[0] == formatter.req.authname:                
+                    user_perms.append( uu[1] )
+
+
         # Check access
         allow = None
         if action.lower() == "allow":
             allow = False
             for p in permissions:
-                if p in formatter.req.perm:
+                if p in user_perms:
                     allow = True
                     break
         else:
             allow = True
             for p in permissions:
-                if p in formatter.req.perm:
+                if p in user_perms:
                     allow = False
                     break
 
